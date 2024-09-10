@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verkaufsphasen-Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .quiz-area {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .phases, .explanations {
+            width: 48%;
+        }
+        .item {
+            background-color: #e9e9e9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .item.selected {
+            background-color: #b8d4ff;
+        }
+        .item.paired {
+            background-color: #98FB98;
+        }
+        .item.correct {
+            background-color: #98FB98;
+        }
+        .item.incorrect {
+            background-color: #FFA07A;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #message {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Verkaufsphasen-Quiz</h1>
+        <div class="quiz-area">
+            <div class="phases" id="phases"></div>
+            <div class="explanations" id="explanations"></div>
+        </div>
+        <button onclick="checkAnswers()">Antworten überprüfen</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            { 
+                phase: "Kontaktaufnahme zum Kunden/Begrüßung", 
+                explanation: "Der Kunde erwartet in dieser Phase des Verkaufsgesprächs, freundlich begrüßt zu werden. Dadurch zeigt das Verkaufspersonal dem Kunden seine Wertschätzung. Dabei sollte sich ein Verkäufer nie aufgrund der ersten äußerlichen Eindrücke eine (vorschnelle) Meinung bilden."
+            },
+            { 
+                phase: "Ermittlung des Kaufwunsches/Bedarfsermittlung", 
+                explanation: "Weiß der Kunde schon genau, was er kaufen möchte, braucht der Verkäufer den gewünschten Artikel nur auszuhändigen (Aushändigungskauf). Will der Kunde zwar kaufen, ist sich aber noch nicht ge­nau im Klaren, was, muss der Verkäufer konkrete Informationen gewinnen. Dazu sollte der Verkäufer dem Kun­den situationsgerechte Fragen stellen, die in der Regel mit einem Fragewort beginnen sollten."
+            },
+            { 
+                phase: "Warenvorlage", 
+                explanation: "Es sollten dem Kunden maxi­mal drei Artikel - in begründeten Einzelfällen fünf - vorgelegt werden, damit er nicht die Übersicht verliert. Es sollten Artikel sein, die dem Kaufwunsch und der Kauf­kraft des Kunden entsprechen. Wenn möglich, dem Kunden die Ware zum An­- und Ausprobieren in die Hand geben."
+            },
+            { 
+                phase: "Verkaufsargumentation", 
+                explanation: "Dabei geht der Verkaufsmitarbeiter idealerweise wie folgt vor: Der Verkäufer macht sich die Warenmerkmale des Artikels klar. Der Verkäufer muss die Merkmale und Eigenschaften des Artikels so übersetzen, dass der Kunde sie als Vorteile sehen kann. Der Verkäufer überträgt die Vorteile, die der Artikel für den Kunden haben kann, in eine kundenbezogene Sprache unter Verwendung des „Sie-Stils\": Durch eine direkte Ansprache des Kunden wird eine unmittelbare Beziehung zwischen dem Kunden und dem Artikel hergestellt. Aus der Vielzahl der denkbaren kundenbezogenen Verkaufsargumente wird der Verkäufer diejenigen im Verkaufsgespräch verwenden, die am ehesten das Problem des Kunden lösen."
+            },
+            { 
+                phase: "Preisnennung", 
+                explanation: "Der Preis sollte dem Kunden in der Regel erst dann ge­nannt werden, wenn er nach der Verkaufsargumentation des Verkäufers den Verkaufswert des Artikels kennt. Der Preis sollte dem Kunden nie isoliert mitgeteilt werden, sondern immer in Bezug zur Leistung gesetzt werden. Auf keinen Fall sollten die Begriffe „teuer\" bzw. „billig\" in einem Ver­kaufsgespräch verwendet werden."
+            },
+            { 
+                phase: "Einwandbehandlung", 
+                explanation: "Ist der Kunde unsicher oder hat er Fragen bzw. Be­denken, äußert er Einwände, die vom Verkäufer genau beachtet werden müssen und nie übergangen werden dürfen. Ohne in Widerspruch zum Kunden zu geraten, sollten die Kundeneinwände höflich und sachkundig ent­kräftet werden."
+            },
+            { 
+                phase: "Kaufentscheidung herbeiführen", 
+                explanation: "- eine Zusammenfassung der Verkaufsargumentation,\n- systematische Einschränkung der Artikelauswahl auf zwei Artikel,\n- direkte Kaufaufforderung, Achtung: nur in absoluten Sondersituationen, ansonsten nie\n- Handlungen oder Argumentationen, als wäre die Entscheidung des Kunden bereits gefallen."
+            },
+            { 
+                phase: "Abschluss der Verkaufsverhandlung/Kaufabschluss", 
+                explanation: "Der Verkäufer sollte noch einmal die Richtigkeit der Entscheidung des Kunden bekräftigen (damit der Kunde das Geschäft in angenehmer Erinnerung hat und gern wiederkommt). Neben dem Kassieren des Kaufpreises und dem eventuellen Einpacken der gekauften Ware bedankt und verabschiedet sich das Verkaufspersonal."
+            }
+        ];
+
+        let selectedPhase = null;
+        let selectedExplanation = null;
+        let pairs = [];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function renderQuiz() {
+            const phasesContainer = document.getElementById('phases');
+            const explanationsContainer = document.getElementById('explanations');
+
+            const phases = quizData.map(item => item.phase);
+            const explanations = quizData.map(item => item.explanation);
+            
+            shuffle(phases);
+            shuffle(explanations);
+
+            phases.forEach((phase) => {
+                const phaseDiv = document.createElement('div');
+                phaseDiv.className = 'item';
+                phaseDiv.textContent = phase;
+                phaseDiv.onclick = () => selectItem(phaseDiv, 'phase');
+                phasesContainer.appendChild(phaseDiv);
+            });
+
+            explanations.forEach((explanation) => {
+                const explanationDiv = document.createElement('div');
+                explanationDiv.className = 'item';
+                explanationDiv.textContent = explanation;
+                explanationDiv.onclick = () => selectItem(explanationDiv, 'explanation');
+                explanationsContainer.appendChild(explanationDiv);
+            });
+        }
+
+        function selectItem(element, type) {
+            if (type === 'phase') {
+                if (selectedPhase) selectedPhase.classList.remove('selected');
+                selectedPhase = element;
+            } else {
+                if (selectedExplanation) selectedExplanation.classList.remove('selected');
+                selectedExplanation = element;
+            }
+            element.classList.add('selected');
+
+            if (selectedPhase && selectedExplanation) {
+                createPair();
+            }
+        }
+
+        function createPair() {
+            pairs.push({
+                phase: selectedPhase,
+                explanation: selectedExplanation
+            });
+
+            selectedPhase.classList.remove('selected');
+            selectedExplanation.classList.remove('selected');
+            selectedPhase.classList.add('paired');
+            selectedExplanation.classList.add('paired');
+
+            selectedPhase = null;
+            selectedExplanation = null;
+
+            updateMessage();
+        }
+
+        function updateMessage() {
+            const messageElement = document.getElementById('message');
+            const remainingPairs = quizData.length - pairs.length;
+            if (remainingPairs > 0) {
+                messageElement.textContent = `Noch ${remainingPairs} Paare zu verbinden.`;
+            } else {
+                messageElement.textContent = 'Alle Paare verbunden. Klicken Sie auf "Antworten überprüfen", um Ihr Ergebnis zu sehen.';
+            }
+        }
+
+        function checkAnswers() {
+            let correctCount = 0;
+
+            pairs.forEach(pair => {
+                const correctPair = quizData.find(item => item.phase === pair.phase.textContent);
+                if (correctPair && correctPair.explanation === pair.explanation.textContent) {
+                    pair.phase.classList.add('correct');
+                    pair.explanation.classList.add('correct');
+                    correctCount++;
+                } else {
+                    pair.phase.classList.add('incorrect');
+                    pair.explanation.classList.add('incorrect');
+                }
+            });
+
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = `Sie haben ${correctCount} von ${quizData.length} Paaren richtig zugeordnet.`;
+        }
+
+        renderQuiz();
+        updateMessage();
+    </script>
+</body>
+</html>
